@@ -16,7 +16,7 @@ type HandleBook struct {
 	useCase UseCase
 }
 
-func newHandlerBook(uc UseCase) Handler {
+func NewHandlerBook(uc UseCase) Handler {
 	return &HandleBook{useCase: uc}
 }
 
