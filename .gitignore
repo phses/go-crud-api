@@ -1,0 +1,47 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Go binary and object files
+*.out
+*.o
+*.a
+
+# Test binary
+*.test
+
+# Vendor directory (if using Go modules and 'go mod vendor')
+/vendor/
+
+# Log files
+*.log
+
+# IDE directories and files
+.idea/
+.vscode/
+*.swp
+*~
+
+# Go workspace file (Go modules)
+go.work
+go.work.sum
+
+# Dependency directories
+bin/
+pkg/
+
+# Environment variables and secret keys
+.env
+
+# macOS files
+.DS_Store
+
+# Linux files
+*.cgo1.go
+*.cgo2.c
+
+# Coverage files
+coverage.out
+coverage.html
