@@ -14,9 +14,9 @@ const (
 )
 
 type Book struct {
-	ID          int
-	Title       string
-	Genre       GenreType
-	Author      string
-	ReleaseDate time.Time
+	ID          int       `db:"id"`
+	Title       string    `db:"title"`
+	Genre       GenreType `db:"genre"`
+	Author      string    `db:"author"`
+	ReleaseDate time.Time `db:"release_date"`
 }

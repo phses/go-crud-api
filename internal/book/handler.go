@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 type Handler interface {
@@ -21,7 +23,7 @@ func NewHandlerBook(uc UseCase) Handler {
 }
 
 func (h HandleBook) GetBook(w http.ResponseWriter, r *http.Request) {
-	idStr := r.URL.Query().Get("id")
+	idStr := mux.Vars(r)["id"]
 	id, err := strconv.Atoi(idStr)
 
 	if err != nil {
