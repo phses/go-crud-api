@@ -1,13 +1,14 @@
 package book
 
 import (
+	"context"
 	"errors"
 	"time"
 )
 
 type UseCase interface {
-	Get(id int) (*Book, error)
-	Create(title string, genre string, author string, releaseDate time.Time) (int, error)
+	Get(ctx context.Context, id int) (*Book, error)
+	Create(ctx context.Context, title string, genre string, author string, releaseDate time.Time) (int, error)
 }
 
 type BookUseCase struct {
@@ -18,15 +19,15 @@ func NewBookUseCase(r Repository) UseCase {
 	return &BookUseCase{repo: r}
 }
 
-func (uc *BookUseCase) Get(id int) (*Book, error) {
+func (uc *BookUseCase) Get(ctx context.Context, id int) (*Book, error) {
 	if id <= 0 {
 		return nil, errors.New("invalid Id")
 	}
 
-	return uc.repo.GetById(id)
+	return uc.repo.GetById(ctx, id)
 }
 
-func (uc *BookUseCase) Create(title string, genre string, author string, releaseDate time.Time) (int, error) {
+func (uc *BookUseCase) Create(ctx context.Context, title string, genre string, author string, releaseDate time.Time) (int, error) {
 	if title == "" || genre == "" || author == "" {
 		return 0, errors.New("missing required fields")
 	}
@@ -38,5 +39,5 @@ func (uc *BookUseCase) Create(title string, genre string, author string, release
 		ReleaseDate: releaseDate,
 	}
 
-	return uc.repo.Create(book)
+	return uc.repo.Create(ctx, book)
 }

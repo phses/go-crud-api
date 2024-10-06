@@ -1,9 +1,12 @@
 package book
 
 import (
+	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -31,14 +34,40 @@ func (h HandleBook) GetBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	book, err := h.useCase.Get(id)
+	var wg sync.WaitGroup
+	wg.Add(1)
 
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	resultChan := make(chan *Book)
+	errChan := make(chan error)
+
+	go func() {
+		defer wg.Done()
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+		defer cancel()
+
+		book, err := h.useCase.Get(ctx, id)
+
+		if err != nil {
+			errChan <- err
+			return
+		}
+
+		resultChan <- book
+
+	}()
+
+	select {
+	case book := <-resultChan:
+		if book != nil {
+			json.NewEncoder(w).Encode(book)
+			return
+		}
+		http.Error(w, "Book not fount", http.StatusNotFound)
+	case err := <-errChan:
+		log.Println("Error fetching book", err)
+		http.Error(w, "Error fetching book", http.StatusInternalServerError)
 	}
-
-	json.NewEncoder(w).Encode(book)
 }
 
 func (h HandleBook) CreateBook(w http.ResponseWriter, r *http.Request) {
@@ -61,14 +90,28 @@ func (h HandleBook) CreateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := h.useCase.Create(bookRequest.Title, bookRequest.Genre, bookRequest.Author, releaseDate)
+	resultChan := make(chan int)
+	errChan := make(chan error)
 
-	if err != nil {
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		id, err := h.useCase.Create(ctx, bookRequest.Title, bookRequest.Genre, bookRequest.Author, releaseDate)
+
+		if err != nil {
+			errChan <- err
+			return
+		}
+		resultChan <- id
+
+	}()
+
+	select {
+	case id := <-resultChan:
+		w.WriteHeader(http.StatusCreated)
+		w.Write([]byte(strconv.Itoa(id)))
+	case err := <-errChan:
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
 	}
-
-	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(strconv.Itoa(id)))
-
 }

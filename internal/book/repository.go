@@ -1,6 +1,8 @@
 package book
 
+import "context"
+
 type Repository interface {
-	GetById(id int) (*Book, error)
-	Create(book *Book) (int, error)
+	GetById(ctx context.Context, id int) (*Book, error)
+	Create(ctx context.Context, book *Book) (int, error)
 }
